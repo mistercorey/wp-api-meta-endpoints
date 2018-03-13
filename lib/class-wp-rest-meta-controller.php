@@ -247,7 +247,7 @@ abstract class WP_REST_Meta_Controller extends WP_REST_Controller {
 		}
 
 		// Don't expose serialized data
-		if ( is_serialized( $value ) || ! is_string( $value ) ) {
+		if ( ( is_serialized( $value ) || ! is_string( $value ) ) && ! apply_filters( 'rest_is_valid_meta_data', false, $value, $request ) ) {
 			return new WP_Error( 'rest_meta_protected', sprintf( __( '%s contains serialized data.' ), $key ), array( 'status' => 403 ) );
 		}
 
@@ -313,12 +313,12 @@ abstract class WP_REST_Meta_Controller extends WP_REST_Controller {
 		}
 
 		// for now let's not allow updating of arrays, objects or serialized values.
-		if ( ! $this->is_valid_meta_data( $current->meta_value ) ) {
+		if ( ! apply_filters( 'rest_is_valid_meta_data', $this->is_valid_meta_data( $current->meta_value ), $current->meta_value, $request ) ) {
 			$code = ( $this->parent_type === 'post' ) ? 'rest_post_invalid_action' : 'rest_meta_invalid_action';
 			return new WP_Error( $code, __( 'Invalid existing meta data for action.' ), array( 'status' => 400 ) );
 		}
 
-		if ( ! $this->is_valid_meta_data( $value ) ) {
+		if ( ! apply_filters( 'rest_is_valid_meta_data', $this->is_valid_meta_data( $value ), $value, $request ) ) {
 			$code = ( $this->parent_type === 'post' ) ? 'rest_post_invalid_action' : 'rest_meta_invalid_action';
 			return new WP_Error( $code, __( 'Invalid provided meta data for action.' ), array( 'status' => 400 ) );
 		}
@@ -387,7 +387,7 @@ abstract class WP_REST_Meta_Controller extends WP_REST_Controller {
 	public function create_item( $request ) {
 		$parent_id = (int) $request['parent_id'];
 
-		if ( ! $this->is_valid_meta_data( $request['value'] ) ) {
+		if ( ! apply_filters( 'rest_is_valid_meta_data', $this->is_valid_meta_data( $request['value'] ), $request['value'], $request ) ) {
 			$code = ( $this->parent_type === 'post' ) ? 'rest_post_invalid_action' : 'rest_meta_invalid_action';
 
 			// for now let's not allow updating of arrays, objects or serialized values.
@@ -456,7 +456,7 @@ abstract class WP_REST_Meta_Controller extends WP_REST_Controller {
 		}
 
 		// for now let's not allow updating of arrays, objects or serialized values.
-		if ( ! $this->is_valid_meta_data( $current->meta_value ) ) {
+		if ( ! apply_filters( 'rest_is_valid_meta_data', $this->is_valid_meta_data( $current->meta_value ), $current->meta_value, $request ) ) {
 			$code = ( $this->parent_type === 'post' ) ? 'rest_post_invalid_action' : 'rest_meta_invalid_action';
 			return new WP_Error( $code, __( 'Invalid existing meta data for action.' ), array( 'status' => 400 ) );
 		}
